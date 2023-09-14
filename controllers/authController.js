@@ -5,7 +5,7 @@ import JWT from "jsonwebtoken";
 //Register Controller
 export const registerController = async (req, res) => {
   try {
-    const { name, email, password, phone, address } = req.body;
+    const { name, email, password, answer, phone, address } = req.body;
     //validation
     if (!name) {
       return res.send({ message: "Name is Required" });
@@ -21,6 +21,9 @@ export const registerController = async (req, res) => {
     }
     if (!address) {
       return res.send({ message: "Address is Required" });
+    }
+    if (!answer) {
+      return res.send({ message: "Answer is Required" });
     }
 
     //Check user
@@ -43,6 +46,7 @@ export const registerController = async (req, res) => {
       email,
       phone,
       address,
+      answer,
       password: hashedPassword,
     }).save();
 
@@ -108,6 +112,43 @@ export const loginController = async (req, res) => {
     res.status(500).send({
       success: false,
       message: "Error Loging in.",
+      error,
+    });
+  }
+};
+
+//Forgot Password Controller
+export const forgotPasswordController = async (req, res) => {
+  try {
+    const { email, answer, newPassword } = req.body;
+    if (!email) {
+      return res.status(400).send({ message: "Email is Required" });
+    }
+    if (!answer) {
+      return res.status(400).send({ message: "Answer is Required" });
+    }
+    if (!newPassword) {
+      return res.status(400).send({ message: "New Password is Required" });
+    }
+
+    //Check email and answer
+    const user = await userModel.findOne({ email, answer });
+    //validation
+    if (!user) {
+      res
+        .status(404)
+        .send({ success: false, message: "Wrong email or Answer" });
+    }
+    const hashed = await hashPassword(newPassword);
+    await userModel.findByIdAndUpdate(user._id, { password: hashed });
+    res
+      .status(200)
+      .send({ success: true, message: "Password reset Successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Something went wrong.",
       error,
     });
   }
