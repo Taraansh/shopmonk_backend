@@ -22,12 +22,12 @@ const userSchema = new Schema(
       required: true,
     },
     address: {
-      type: String,
+      type: {},
       required: true,
     },
-    answer:{
-      type:String,
-      required:true,
+    answer: {
+      type: String,
+      required: true,
     },
     role: {
       type: Number,
